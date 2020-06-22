@@ -10,7 +10,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.112.20:3306/foodie?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
+    url: jdbc:mysql://192.168.112.10:3306/foodie?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
     username: root
     password: admin
     hikari:
@@ -23,7 +23,17 @@ spring:
       max-lifetime: 1800000
       connection-test-query: SELECT 1
 
-# mybatis
-mybatis:
-  type-aliases-package: com.vectory.pojo
+# mybatis-plus
+mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.vectory.pojo
+  global-config:
+    db-config:
+      id-type: auto
+      field-strategy: ignored
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    jdbc-type-for-null: null
+    call-setters-on-nulls: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
