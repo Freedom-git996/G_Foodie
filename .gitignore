@@ -1,0 +1,30 @@
+# Compiled class file
+*.class
+ 
+# Log file
+*.log
+ 
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+ 
+#idea
+*.iml
+.idea/
+target/
+src/test/
+foodie-common/src/test/
+foodie-common/target/
+foodie-pojo/src/test/
+foodie-pojo/target/
+foodie-mapper/src/test/
+foodie-mapper/target/
+foodie-service/src/test/
+foodie-service/target/
+foodie-api/src/test/
+foodie-api/target/
