@@ -29,7 +29,7 @@ mybatis-plus:
   type-aliases-package: com.vectory.pojo
   global-config:
     db-config:
-      id-type: auto
+      id-type: input
       field-strategy: ignored
   configuration:
     map-underscore-to-camel-case: true
