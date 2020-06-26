@@ -4,7 +4,7 @@ import com.vectory.enums.YesOrNo;
 import com.vectory.pojo.Carousel;
 import com.vectory.pojo.Category;
 import com.vectory.service.ICarouselService;
-import com.vectory.service.impl.CategoryService;
+import com.vectory.service.ICategoryService;
 import com.vectory.utils.JSONResult;
 import com.vectory.vo.CategoryVO;
 import com.vectory.vo.NewItemsVO;
@@ -25,14 +25,14 @@ import java.util.List;
 public class IndexController {
 
     @Resource
-    private ICarouselService carouselService;
+    private ICarouselService carouselServiceImpl;
     @Resource
-    private CategoryService categoryService;
+    private ICategoryService categoryServiceImpl;
 
     @ApiOperation(value = "获取首页轮播图列表", notes = "获取首页轮播图列表", httpMethod = "GET")
     @GetMapping("/carousel")
     public JSONResult carousel() {
-        List<Carousel> list = carouselService.queryAll(YesOrNo.YES.type);
+        List<Carousel> list = carouselServiceImpl.queryAll(YesOrNo.YES.type);
         return JSONResult.ok(list);
     }
 
@@ -44,7 +44,7 @@ public class IndexController {
     @ApiOperation(value = "获取商品分类(一级分类)", notes = "获取商品分类(一级分类)", httpMethod = "GET")
     @GetMapping("/cats")
     public JSONResult cats() {
-        List<Category> list = categoryService.queryAllRootLevelCat();
+        List<Category> list = categoryServiceImpl.queryAllRootLevelCat();
         return JSONResult.ok(list);
     }
 
@@ -58,7 +58,7 @@ public class IndexController {
             return JSONResult.errorMsg("分类不存在");
         }
 
-        List<CategoryVO> list = categoryService.getSubCatList(rootCatId);
+        List<CategoryVO> list = categoryServiceImpl.getSubCatList(rootCatId);
         return JSONResult.ok(list);
     }
 
@@ -72,7 +72,7 @@ public class IndexController {
             return JSONResult.errorMsg("分类不存在");
         }
 
-        List<NewItemsVO> list = categoryService.getSixNewItemsLazy(rootCatId);
+        List<NewItemsVO> list = categoryServiceImpl.getSixNewItemsLazy(rootCatId);
         return JSONResult.ok(list);
     }
 }

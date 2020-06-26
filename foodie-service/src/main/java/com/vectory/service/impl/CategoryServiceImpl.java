@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class CategoryService implements ICategoryService {
+public class CategoryServiceImpl implements ICategoryService {
 
     @Resource
     private CategoryMapper categoryMapper;

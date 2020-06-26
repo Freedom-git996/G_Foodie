@@ -12,7 +12,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Service
-public class CarouselService implements ICarouselService {
+public class CarouselServiceImpl implements ICarouselService {
 
     @Resource
     private CarouselMapper carouselMapper;
