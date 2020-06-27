@@ -37,3 +37,8 @@ mybatis-plus:
     jdbc-type-for-null: null
     call-setters-on-nulls: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# mybatis-plus自带分页存在不足，分页插件配置
+pagehelper:
+  helperDialect: mysql
+  supportMethodsArguments: true
