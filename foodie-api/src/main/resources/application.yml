@@ -30,7 +30,10 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: input
-      field-strategy: ignored
+      # IGNORED(0): "忽略判断", 所有字段都更新和插入
+      # NOT_NULL(1): "非 NULL 判断", 只更新和插入非NULL值
+      # NOT_EMPTY(2): "非空判断", 只更新和插入非NULL值且非空字符串
+      field-strategy: NOT_NULL
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: false
