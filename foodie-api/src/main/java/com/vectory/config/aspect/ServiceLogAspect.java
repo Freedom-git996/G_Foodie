@@ -1,4 +1,4 @@
-package com.vectory.aspect;
+package com.vectory.config.aspect;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

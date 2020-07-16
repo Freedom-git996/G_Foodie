@@ -1,4 +1,4 @@
-package com.vectory.config;
+package com.vectory.config.swagger;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +13,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-public class Swagger2 {
+public class Swagger2Config {
 
     @Bean
     public Docket createRestApi() {
@@ -27,7 +27,7 @@ public class Swagger2 {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Java架构师养成计划Api")
+                .title("JavaApi")
                 .version("1.0")
                 .description("专注于Java架构师养成")
                 .contact(new Contact("vectory", "http://localhost:8088", "xxxx@168.com"))
