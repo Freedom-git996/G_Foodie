@@ -1,4 +1,4 @@
-package com.vectory.utils;
+package com.vectory.util;
 
 import java.text.*;
 import java.util.*;
@@ -638,12 +638,4 @@ public class DateUtil {
             return false;
         }
     }
-
-    public static void main(String[] args) {
-//    	String timeDir=DateUtil.dateToString(new Date(),DateUtil.ISO_EXPANDED_DATE_FORMAT);
-//		System.out.println(timeDir);
-        boolean flag = DateUtil.isValidDate("1990-10-32", DateUtil.ISO_EXPANDED_DATE_FORMAT);
-        System.out.println(flag);
-    }
-
 }

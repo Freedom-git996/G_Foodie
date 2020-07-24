@@ -1,15 +1,15 @@
 package com.vectory.service.impl;
 
 import com.github.pagehelper.PageInfo;
-import com.vectory.utils.PagedGridResult;
+import com.vectory.vo.PagedGridResultVO;
 
 import java.util.List;
 
 public class BaseServiceImpl {
 
-    public PagedGridResult setterPagedGrid(List<?> list, Integer page) {
+    public PagedGridResultVO setterPagedGrid(List<?> list, Integer page) {
         PageInfo<?> pageList = new PageInfo<>(list);
-        PagedGridResult grid = new PagedGridResult();
+        PagedGridResultVO grid = new PagedGridResultVO();
         grid.setPage(page);
         grid.setRows(list);
         grid.setTotal(pageList.getPages());

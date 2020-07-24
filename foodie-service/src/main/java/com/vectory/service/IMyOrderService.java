@@ -1,23 +1,19 @@
 package com.vectory.service;
 
+import com.vectory.qo.OrderListQO;
+import com.vectory.qo.QueryOrderStatusQO;
 import com.vectory.pojo.Orders;
-import com.vectory.utils.PagedGridResult;
+import com.vectory.vo.PagedGridResultVO;
 import com.vectory.vo.OrderStatusCountsVO;
 
 public interface IMyOrderService {
 
     /**
      * 查询我的订单列表
-     * @param userId userId
-     * @param orderStatus orderStatus
-     * @param page page
-     * @param pageSize pageSize
+     * @param orderListQO orderListQO
      * @return PagedGridResult
      */
-    PagedGridResult queryMyOrders(String userId,
-                                         Integer orderStatus,
-                                         Integer page,
-                                         Integer pageSize);
+    PagedGridResultVO queryMyOrders(OrderListQO orderListQO);
 
     /**
      * 订单状态 --> 商家发货
@@ -27,7 +23,6 @@ public interface IMyOrderService {
 
     /**
      * 查询我的订单
-     *
      * @param userId userId
      * @param orderId orderId
      * @return Orders
@@ -36,7 +31,6 @@ public interface IMyOrderService {
 
     /**
      * 更新订单状态 —> 确认收货
-     *
      * @return boolean
      */
     boolean updateReceiveOrderStatus(String orderId);
@@ -57,12 +51,8 @@ public interface IMyOrderService {
 
     /**
      * 获得分页的订单动向
-     * @param userId userId
-     * @param page page
-     * @param pageSize pageSize
+     * @param queryOrderStatusQO queryOrderStatusQO
      * @return PagedGridResult
      */
-    PagedGridResult getOrdersTrend(String userId,
-                                          Integer page,
-                                          Integer pageSize);
+    PagedGridResultVO getOrdersTrend(QueryOrderStatusQO queryOrderStatusQO);
 }

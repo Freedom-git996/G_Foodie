@@ -1,14 +1,18 @@
 package com.vectory.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.vectory.bo.UserBO;
+import com.vectory.qo.UserPassportQO;
+import com.vectory.vo.UserVO;
 import com.vectory.enums.Sex;
 import com.vectory.mapper.UsersMapper;
 import com.vectory.pojo.Users;
+import com.vectory.response.error.BusinessException;
+import com.vectory.response.error.EmBusinessResult;
 import com.vectory.service.IUserService;
-import com.vectory.utils.DateUtil;
-import com.vectory.utils.MD5Util;
+import com.vectory.util.EncryptUtil;
+import com.vectory.util.DateUtil;
 import org.n3r.idworker.Sid;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,28 +40,32 @@ public class UserServiceImpl implements IUserService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public Users createUser(UserBO userBo) {
+    public UserVO createUser(UserPassportQO userPassportQO) {
         Users user = new Users();
-        user.setUsername(userBo.getUsername());
-        user.setPassword(MD5Util.MD5EncodeUtf8(userBo.getPassword()));
-        user.setNickname(userBo.getUsername());
+        user.setId(sid.nextShort());
+        user.setUsername(userPassportQO.getUsername());
+        user.setNickname(userPassportQO.getUsername());
+        user.setPassword(EncryptUtil.getInstance().MD5(userPassportQO.getPassword()));
         user.setFace(USER_FACE);
-        user.setBirthday(DateUtil.stringToDate("1900-01-01"));
+        user.setBirthday(DateUtil.stringToDate("1970-01-01"));
         user.setSex(Sex.secret.type);
         user.setCreatedTime(new Date());
         user.setUpdatedTime(new Date());
-
-        user.setId(sid.nextShort());
-
-        usersMapper.insert(user);
-        return user;
+        if(usersMapper.insert(user) <= 0) throw new BusinessException(EmBusinessResult.REGISTER_ERROR);
+        UserVO result = new UserVO();
+        BeanUtils.copyProperties(user, result);
+        return result;
     }
 
     @Override
-    public Users queryUserForLogin(String username, String password) {
+    public UserVO queryUserForLogin(UserPassportQO userPassportQO) {
         QueryWrapper<Users> usersQueryWrapper = new QueryWrapper<>();
-        usersQueryWrapper.eq("username", username);
-        usersQueryWrapper.eq("password", password);
-        return usersMapper.selectOne(usersQueryWrapper);
+        usersQueryWrapper.eq("username", userPassportQO.getUsername());
+        usersQueryWrapper.eq("password", EncryptUtil.getInstance().MD5(userPassportQO.getPassword()));
+        Users record = usersMapper.selectOne(usersQueryWrapper);
+        if(record == null) throw new BusinessException(EmBusinessResult.LOGIN_ERROR);
+        UserVO result = new UserVO();
+        BeanUtils.copyProperties(record, result);
+        return result;
     }
 }

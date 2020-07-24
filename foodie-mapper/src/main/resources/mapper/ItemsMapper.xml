@@ -20,7 +20,7 @@
     updated_time
   </sql>
 
-  <select id="queryItemComments" parameterType="Map" resultType="com.vectory.vo.ItemCommentVO">
+  <select id="queryItemCommentsPlus" parameterType="Map" resultType="com.vectory.vo.ItemCommentVO">
     SELECT
     ic.comment_level as commentLevel,
     ic.content as content,
@@ -41,7 +41,7 @@
     </if>
   </select>
 
-  <select id="searchItems" parameterType="Map" resultType="com.vectory.vo.SearchItemsVO">
+  <select id="searchItemsPlus" parameterType="Map" resultType="com.vectory.vo.SearchItemsVO">
     SELECT
     i.id as itemId,
     i.item_name as itemName,
@@ -77,7 +77,7 @@
     </choose>
   </select>
 
-  <select id="searchItemsByThirdCat" parameterType="Map" resultType="com.vectory.vo.SearchItemsVO">
+  <select id="searchItemsByThirdCatPlus" parameterType="Map" resultType="com.vectory.vo.SearchItemsVO">
     SELECT
     i.id as itemId,
     i.item_name as itemName,

@@ -22,7 +22,6 @@
   </sql>
 
   <select id="saveComments" parameterType="Map">
-
     insert into
     items_comments
     (

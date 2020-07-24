@@ -1,6 +1,6 @@
 package com.vectory.service;
 
-import com.vectory.bo.AddressBO;
+import com.vectory.qo.OperateAddressQO;
 import com.vectory.pojo.UserAddress;
 
 import java.util.List;
@@ -16,15 +16,15 @@ public interface IAddressService {
 
     /**
      * 用户新增地址
-     * @param addressBO addressBO
+     * @param operateAddressQO operateAddressQO
      */
-    void addNewUserAddress(AddressBO addressBO);
+    void addNewUserAddress(OperateAddressQO operateAddressQO);
 
     /**
      * 用户修改地址
-     * @param addressBO addressBO
+     * @param operateAddressQO operateAddressQO
      */
-    void updateUserAddress(AddressBO addressBO);
+    void updateUserAddress(OperateAddressQO operateAddressQO);
 
     /**
      * 根据用户id和地址id，删除对应的用户地址信息

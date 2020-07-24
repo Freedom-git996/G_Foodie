@@ -1,8 +1,7 @@
 package com.vectory.controller.center;
 
-import com.vectory.pojo.Users;
+import com.vectory.response.CommonReturnType;
 import com.vectory.service.ICenterUserService;
-import com.vectory.utils.JSONResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
-@Api(value = "center - 用户中心", tags = {"用户中心展示的相关接口"})
+@Api(value = "USER_CENTER")
 @RestController
 @RequestMapping("center")
 public class CenterController {
@@ -21,13 +20,10 @@ public class CenterController {
     @Resource
     private ICenterUserService centerUserService;
 
-    @ApiOperation(value = "获取用户信息", notes = "获取用户信息", httpMethod = "GET")
+    @ApiOperation(value = "USER_INFO", httpMethod = "GET")
     @GetMapping("userInfo")
-    public JSONResult userInfo(
-            @ApiParam(name = "userId", value = "用户id", required = true)
-            @RequestParam String userId) {
-
-        Users user = centerUserService.queryUserInfo(userId);
-        return JSONResult.ok(user);
+    public CommonReturnType userInfo(@ApiParam(name = "userId", value = "用户ID", required = true)
+                                   @RequestParam String userId) {
+        return CommonReturnType.success(centerUserService.queryUserInfo(userId));
     }
 }

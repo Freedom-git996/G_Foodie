@@ -1,7 +1,10 @@
 package com.vectory.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.vectory.qo.OrderListQO;
+import com.vectory.qo.QueryOrderStatusQO;
 import com.vectory.enums.OrderStatusEnum;
 import com.vectory.enums.YesOrNo;
 import com.vectory.mapper.OrderStatusMapper;
@@ -9,7 +12,7 @@ import com.vectory.mapper.OrdersMapper;
 import com.vectory.pojo.OrderStatus;
 import com.vectory.pojo.Orders;
 import com.vectory.service.IMyOrderService;
-import com.vectory.utils.PagedGridResult;
+import com.vectory.vo.PagedGridResultVO;
 import com.vectory.vo.MyOrdersVO;
 import com.vectory.vo.OrderStatusCountsVO;
 import org.springframework.stereotype.Service;
@@ -19,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -32,18 +34,14 @@ public class MyOrderServiceImpl extends BaseServiceImpl implements IMyOrderServi
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public PagedGridResult queryMyOrders(String userId, Integer orderStatus, Integer page, Integer pageSize) {
+    public PagedGridResultVO queryMyOrders(OrderListQO orderListQO) {
         Map<String, Object> map = new HashMap<>();
-        map.put("userId", userId);
-        if (orderStatus != null) {
-            map.put("orderStatus", orderStatus);
-        }
-
-        PageHelper.startPage(page, pageSize);
-
-        List<MyOrdersVO> list = ordersMapper.queryMyOrders(map);
-
-        return setterPagedGrid(list, page);
+        map.put("userId", orderListQO.getUserId());
+        if (orderListQO.getOrderStatus() != null)
+            map.put("orderStatus", orderListQO.getOrderStatus());
+        IPage<MyOrdersVO> myOrdersVOIPage = ordersMapper.queryMyOrders(
+                new Page(orderListQO.getPageIndex(), orderListQO.getPageSize()), map);
+        return setterPagedGrid(myOrdersVOIPage.getRecords(), Integer.parseInt(String.valueOf(myOrdersVOIPage.getCurrent())));
     }
 
     @Transactional(propagation=Propagation.REQUIRED)
@@ -52,11 +50,9 @@ public class MyOrderServiceImpl extends BaseServiceImpl implements IMyOrderServi
         OrderStatus updateOrder = new OrderStatus();
         updateOrder.setOrderStatus(OrderStatusEnum.WAIT_RECEIVE.type);
         updateOrder.setDeliverTime(new Date());
-
         QueryWrapper<OrderStatus> orderStatusQueryWrapper = new QueryWrapper<>();
         orderStatusQueryWrapper.eq("order_id", orderId);
         orderStatusQueryWrapper.eq("order_status", OrderStatusEnum.WAIT_DELIVER.type);
-
         orderStatusMapper.update(updateOrder, orderStatusQueryWrapper);
     }
 
@@ -82,9 +78,7 @@ public class MyOrderServiceImpl extends BaseServiceImpl implements IMyOrderServi
         orderStatusQueryWrapper.eq("order_id", orderId);
         orderStatusQueryWrapper.eq("order_status", OrderStatusEnum.WAIT_RECEIVE.type);
 
-        int result = orderStatusMapper.update(updateOrder, orderStatusQueryWrapper);
-
-        return result == 1;
+        return orderStatusMapper.update(updateOrder, orderStatusQueryWrapper) == 1;
     }
 
     @Transactional(propagation=Propagation.REQUIRED)
@@ -98,45 +92,43 @@ public class MyOrderServiceImpl extends BaseServiceImpl implements IMyOrderServi
         ordersQueryWrapper.eq("user_id", userId);
         ordersQueryWrapper.eq("order_id", orderId);
 
-        int result = ordersMapper.update(updateOrder, ordersQueryWrapper);
-
-        return result == 1;
+        return ordersMapper.update(updateOrder, ordersQueryWrapper) == 1;
     }
 
     @Transactional(propagation=Propagation.SUPPORTS)
     @Override
     public OrderStatusCountsVO getOrderStatusCounts(String userId) {
+        OrderStatusCountsVO orderStatusCountsVO = new OrderStatusCountsVO();
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
 
         map.put("orderStatus", OrderStatusEnum.WAIT_PAY.type);
         int waitPayCounts = ordersMapper.getMyOrderStatusCounts(map);
+        orderStatusCountsVO.setWaitPayCounts(waitPayCounts);
 
         map.put("orderStatus", OrderStatusEnum.WAIT_DELIVER.type);
         int waitDeliverCounts = ordersMapper.getMyOrderStatusCounts(map);
+        orderStatusCountsVO.setWaitDeliverCounts(waitDeliverCounts);
 
         map.put("orderStatus", OrderStatusEnum.WAIT_RECEIVE.type);
         int waitReceiveCounts = ordersMapper.getMyOrderStatusCounts(map);
+        orderStatusCountsVO.setWaitReceiveCounts(waitReceiveCounts);
 
         map.put("orderStatus", OrderStatusEnum.SUCCESS.type);
         map.put("isComment", YesOrNo.NO.type);
         int waitCommentCounts = ordersMapper.getMyOrderStatusCounts(map);
+        orderStatusCountsVO.setWaitCommentCounts(waitCommentCounts);
 
-        return new OrderStatusCountsVO(waitPayCounts,
-                waitDeliverCounts,
-                waitReceiveCounts,
-                waitCommentCounts);
+        return orderStatusCountsVO;
     }
 
     @Transactional(propagation=Propagation.SUPPORTS)
     @Override
-    public PagedGridResult getOrdersTrend(String userId, Integer page, Integer pageSize) {
+    public PagedGridResultVO getOrdersTrend(QueryOrderStatusQO queryOrderStatusQO) {
         Map<String, Object> map = new HashMap<>();
-        map.put("userId", userId);
-
-        PageHelper.startPage(page, pageSize);
-        List<OrderStatus> list = ordersMapper.getMyOrderTrend(map);
-
-        return setterPagedGrid(list, page);
+        map.put("userId", queryOrderStatusQO.getUserId());
+        IPage<OrderStatus> orderStatusIPage = ordersMapper.getMyOrderTrend(
+                new Page(queryOrderStatusQO.getPageIndex(), queryOrderStatusQO.getPageSize()), map);
+        return setterPagedGrid(orderStatusIPage.getRecords(), Integer.parseInt(String.valueOf(orderStatusIPage.getCurrent())));
     }
 }

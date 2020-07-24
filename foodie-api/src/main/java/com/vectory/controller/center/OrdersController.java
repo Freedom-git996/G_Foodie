@@ -1,11 +1,14 @@
-package com.vectory.controller;
+package com.vectory.controller.center;
 
-import com.vectory.bo.SubmitOrderBO;
+import com.vectory.controller.BaseController;
+import com.vectory.qo.SubmitOrderQO;
 import com.vectory.enums.OrderStatusEnum;
-import com.vectory.enums.PayMethod;
 import com.vectory.pojo.OrderStatus;
+import com.vectory.response.CommonReturnType;
+import com.vectory.response.error.EmBusinessResult;
 import com.vectory.service.IOrderService;
-import com.vectory.utils.JSONResult;
+import com.vectory.util.CookieUtil;
+import com.vectory.util.validator.ValidatorUtil;
 import com.vectory.vo.MerchantOrdersVO;
 import com.vectory.vo.OrderVO;
 import io.swagger.annotations.Api;
@@ -23,7 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
-@Api(value = "订单相关", tags = {"订单相关的api接口"})
+@Api(value = "ORDERS")
 @RequestMapping("orders")
 @RestController
 public class OrdersController extends BaseController {
@@ -33,41 +36,25 @@ public class OrdersController extends BaseController {
     @Resource
     private RestTemplate restTemplate;
 
-    @ApiOperation(value = "用户下单", notes = "用户下单", httpMethod = "POST")
-    @PostMapping("/create")
-    public JSONResult create(
-            @RequestBody SubmitOrderBO submitOrderBO,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-
-        if (!submitOrderBO.getPayMethod().equals(PayMethod.WEIXIN.type)
-                && !submitOrderBO.getPayMethod().equals(PayMethod.ALIPAY.type)) {
-            return JSONResult.errorMsg("支付方式不支持！");
-        }
-
-//        System.out.println(submitOrderBO.toString());
-
+    @ApiOperation(value = "CREATE_ORDER")
+    @PostMapping("create")
+    public CommonReturnType create(@RequestBody SubmitOrderQO submitOrderQO,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response) {
+        ValidatorUtil.validate(submitOrderQO);
         // 1. 创建订单
-        OrderVO orderVO = orderService.createOrder(submitOrderBO);
+        OrderVO orderVO = orderService.createOrder(submitOrderQO);
         String orderId = orderVO.getOrderId();
-
         // 2. 创建订单以后，移除购物车中已结算（已提交）的商品
-        /**
-         * 1001
-         * 2002 -> 用户购买
-         * 3003 -> 用户购买
-         * 4004
-         */
         // TODO 整合redis之后，完善购物车中的已结算商品清除，并且同步到前端的cookie
-//        CookieUtils.setCookie(request, response, FOODIE_SHOPCART, "", true);
-
+        CookieUtil.setCookie(request, response, FOODIE_SHOPCART, "", true);
         // 3. 向支付中心发送当前订单，用于保存支付中心的订单数据
         MerchantOrdersVO merchantOrdersVO = orderVO.getMerchantOrdersVO();
         merchantOrdersVO.setReturnUrl(payReturnUrl);
-
         // 为了方便测试购买，所以所有的支付金额都统一改为1分钱
         merchantOrdersVO.setAmount(1);
 
+        // 填写慕课平台提供的支付凭证
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("imoocUserId","imooc");
@@ -76,18 +63,17 @@ public class OrdersController extends BaseController {
         HttpEntity<MerchantOrdersVO> entity =
                 new HttpEntity<>(merchantOrdersVO, headers);
 
-        ResponseEntity<JSONResult> responseEntity =
+        ResponseEntity<CommonReturnType> responseEntity =
                 restTemplate.postForEntity(paymentUrl,
                         entity,
-                        JSONResult.class);
-        JSONResult paymentResult = responseEntity.getBody();
+                        CommonReturnType.class);
+        CommonReturnType paymentResult = responseEntity.getBody();
         assert paymentResult != null;
         if (paymentResult.getStatus() != 200) {
             log.error("发送错误：{}", paymentResult.getMsg());
-            return JSONResult.errorMsg("支付中心订单创建失败，请联系管理员！");
+            return CommonReturnType.fail(EmBusinessResult.PAYMENT_ORDER_FAIL);
         }
-
-        return JSONResult.ok(orderId);
+        return CommonReturnType.success(orderId);
     }
 
     @PostMapping("notifyMerchantOrderPaid")
@@ -97,9 +83,8 @@ public class OrdersController extends BaseController {
     }
 
     @PostMapping("getPaidOrderInfo")
-    public JSONResult getPaidOrderInfo(String orderId) {
-
+    public CommonReturnType getPaidOrderInfo(String orderId) {
         OrderStatus orderStatus = orderService.queryOrderStatusInfo(orderId);
-        return JSONResult.ok(orderStatus);
+        return CommonReturnType.success(orderStatus);
     }
 }

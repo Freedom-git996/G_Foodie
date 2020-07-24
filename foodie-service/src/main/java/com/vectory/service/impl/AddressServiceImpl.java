@@ -1,7 +1,7 @@
 package com.vectory.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.vectory.bo.AddressBO;
+import com.vectory.qo.OperateAddressQO;
 import com.vectory.enums.YesOrNo;
 import com.vectory.mapper.UserAddressMapper;
 import com.vectory.pojo.UserAddress;
@@ -34,38 +34,29 @@ public class AddressServiceImpl implements IAddressService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void addNewUserAddress(AddressBO addressBO) {
+    public void addNewUserAddress(OperateAddressQO operateAddressQO) {
         int isDefault = 0;
-        List<UserAddress> addressList = this.queryAll(addressBO.getUserId());
-        if (addressList == null || addressList.isEmpty()) {
+        List<UserAddress> addressList = this.queryAll(operateAddressQO.getUserId());
+        if (addressList == null || addressList.isEmpty())
             isDefault = 1;
-        }
-
         String addressId = sid.nextShort();
-
-        // 2. 保存地址到数据库
         UserAddress newAddress = new UserAddress();
-        BeanUtils.copyProperties(addressBO, newAddress);
-
+        BeanUtils.copyProperties(operateAddressQO, newAddress);
         newAddress.setId(addressId);
         newAddress.setIsDefault(isDefault);
         newAddress.setCreatedTime(new Date());
         newAddress.setUpdatedTime(new Date());
-
         userAddressMapper.insert(newAddress);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void updateUserAddress(AddressBO addressBO) {
-        String addressId = addressBO.getAddressId();
-
+    public void updateUserAddress(OperateAddressQO operateAddressQO) {
+        String addressId = operateAddressQO.getAddressId();
         UserAddress pendingAddress = new UserAddress();
-        BeanUtils.copyProperties(addressBO, pendingAddress);
-
+        BeanUtils.copyProperties(operateAddressQO, pendingAddress);
         pendingAddress.setId(addressId);
         pendingAddress.setUpdatedTime(new Date());
-
         userAddressMapper.updateById(pendingAddress);
     }
 
@@ -80,7 +71,6 @@ public class AddressServiceImpl implements IAddressService {
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void updateUserAddressToBeDefault(String userId, String addressId) {
-        // 1. 查找默认地址，设置为不默认
         QueryWrapper<UserAddress> userAddressQueryWrapper = new QueryWrapper<>();
         userAddressQueryWrapper.eq("user_id", userId);
         userAddressQueryWrapper.eq("is_default", YesOrNo.YES.type);
@@ -90,7 +80,6 @@ public class AddressServiceImpl implements IAddressService {
             userAddressMapper.updateById(ua);
         }
 
-        // 2. 根据地址id修改为默认的地址
         UserAddress defaultAddress = new UserAddress();
         defaultAddress.setId(addressId);
         defaultAddress.setUserId(userId);

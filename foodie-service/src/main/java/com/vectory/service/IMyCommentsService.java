@@ -1,8 +1,9 @@
 package com.vectory.service;
 
-import com.vectory.bo.OrderItemsCommentBO;
+import com.vectory.qo.OrderItemCommentQO;
+import com.vectory.qo.QueryMyCommentQO;
 import com.vectory.pojo.OrderItems;
-import com.vectory.utils.PagedGridResult;
+import com.vectory.vo.PagedGridResultVO;
 
 import java.util.List;
 
@@ -10,26 +11,24 @@ public interface IMyCommentsService {
 
     /**
      * 根据订单id查询关联的商品
-     * @param orderId
-     * @return
+     * @param orderId orderId
+     * @return List
      */
     List<OrderItems> queryPendingComment(String orderId);
 
     /**
      * 保存用户的评论
-     * @param orderId
-     * @param userId
-     * @param commentList
+     * @param orderId orderId
+     * @param userId userId
+     * @param commentList commentList
      */
-    void saveComments(String orderId, String userId, List<OrderItemsCommentBO> commentList);
+    void saveComments(String orderId, String userId, List<OrderItemCommentQO> commentList);
 
 
     /**
      * 我的评价查询 分页
-     * @param userId
-     * @param page
-     * @param pageSize
-     * @return
+     * @param queryMyCommentQO queryMyCommentQO
+     * @return PagedGridResultVO
      */
-    PagedGridResult queryMyComments(String userId, Integer page, Integer pageSize);
+    PagedGridResultVO queryMyComments(QueryMyCommentQO queryMyCommentQO);
 }

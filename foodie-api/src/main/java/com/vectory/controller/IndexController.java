@@ -3,23 +3,21 @@ package com.vectory.controller;
 import com.vectory.enums.YesOrNo;
 import com.vectory.pojo.Carousel;
 import com.vectory.pojo.Category;
+import com.vectory.response.CommonReturnType;
+import com.vectory.response.error.EmBusinessResult;
 import com.vectory.service.ICarouselService;
 import com.vectory.service.ICategoryService;
-import com.vectory.utils.JSONResult;
 import com.vectory.vo.CategoryVO;
 import com.vectory.vo.NewItemsVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
 
-@Api(value = "首页", tags = {"首页展示的相关接口"})
+@Api(value = "INDEX")
 @RestController
 @RequestMapping("index")
 public class IndexController {
@@ -29,50 +27,37 @@ public class IndexController {
     @Resource
     private ICategoryService categoryServiceImpl;
 
-    @ApiOperation(value = "获取首页轮播图列表", notes = "获取首页轮播图列表", httpMethod = "GET")
-    @GetMapping("/carousel")
-    public JSONResult carousel() {
+    @ApiOperation(value = "GET_CAROUSEL", httpMethod = "GET")
+    @GetMapping("carousel")
+    public CommonReturnType carousel() {
         List<Carousel> list = carouselServiceImpl.queryAll(YesOrNo.YES.type);
-        return JSONResult.ok(list);
+        return CommonReturnType.success(list);
     }
 
-    /**
-     * 首页分类展示需求：
-     * 1. 第一次刷新主页查询大分类，渲染展示到首页
-     * 2. 如果鼠标上移到大分类，则加载其子分类的内容，如果已经存在子分类，则不需要加载（懒加载）
-     */
-    @ApiOperation(value = "获取商品分类(一级分类)", notes = "获取商品分类(一级分类)", httpMethod = "GET")
-    @GetMapping("/cats")
-    public JSONResult cats() {
+    @ApiOperation(value = "GET_ROOT_CATS", httpMethod = "GET")
+    @GetMapping("cats")
+    public CommonReturnType cats() {
         List<Category> list = categoryServiceImpl.queryAllRootLevelCat();
-        return JSONResult.ok(list);
+        return CommonReturnType.success(list);
     }
 
-    @ApiOperation(value = "获取商品子分类", notes = "获取商品子分类", httpMethod = "GET")
+    @ApiOperation(value = "GET_CHILD_CATS", httpMethod = "GET")
     @GetMapping("/subCat/{rootCatId}")
-    public JSONResult subCat(
-            @ApiParam(name = "rootCatId", value = "一级分类id", required = true)
-            @PathVariable Integer rootCatId) {
-
-        if (rootCatId == null) {
-            return JSONResult.errorMsg("分类不存在");
-        }
-
+    public CommonReturnType subCat(@ApiParam(name = "rootCatId", value = "一级分类id", required = true)
+                                       @PathVariable Integer rootCatId) {
+        if (rootCatId == null)
+            return CommonReturnType.fail(EmBusinessResult.CATEGORY_NOT_EXIST);
         List<CategoryVO> list = categoryServiceImpl.getSubCatList(rootCatId);
-        return JSONResult.ok(list);
+        return CommonReturnType.success(list);
     }
 
-    @ApiOperation(value = "查询每个一级分类下的最新6条商品数据", notes = "查询每个一级分类下的最新6条商品数据", httpMethod = "GET")
+    @ApiOperation(value = "SIX_ITEM_FOR_SHOW", httpMethod = "GET")
     @GetMapping("/sixNewItems/{rootCatId}")
-    public JSONResult sixNewItems(
-            @ApiParam(name = "rootCatId", value = "一级分类id", required = true)
-            @PathVariable Integer rootCatId) {
-
-        if (rootCatId == null) {
-            return JSONResult.errorMsg("分类不存在");
-        }
-
+    public CommonReturnType sixNewItems(@ApiParam(name = "rootCatId", value = "一级分类id", required = true)
+                                      @PathVariable Integer rootCatId) {
+        if (rootCatId == null)
+            return CommonReturnType.fail(EmBusinessResult.CATEGORY_NOT_EXIST);
         List<NewItemsVO> list = categoryServiceImpl.getSixNewItemsLazy(rootCatId);
-        return JSONResult.ok(list);
+        return CommonReturnType.success(list);
     }
 }

@@ -1,15 +1,15 @@
 package com.vectory.service;
 
-import com.vectory.bo.SubmitOrderBO;
+import com.vectory.qo.SubmitOrderQO;
 import com.vectory.pojo.OrderStatus;
 import com.vectory.vo.OrderVO;
 
 public interface IOrderService {
     /**
      * 用于创建订单相关信息
-     * @param submitOrderBO submitOrderBO
+     * @param submitOrderQO submitOrderBO
      */
-    OrderVO createOrder(SubmitOrderBO submitOrderBO);
+    OrderVO createOrder(SubmitOrderQO submitOrderQO);
 
     /**
      * 修改订单状态

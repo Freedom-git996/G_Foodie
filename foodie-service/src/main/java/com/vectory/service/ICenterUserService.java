@@ -1,29 +1,29 @@
 package com.vectory.service;
 
-import com.vectory.bo.CenterUserBO;
-import com.vectory.pojo.Users;
+import com.vectory.qo.UserUpdateQO;
+import com.vectory.vo.UserVO;
 
 public interface ICenterUserService {
 
     /**
      * 根据用户id查询用户信息
      * @param userId userId
-     * @return Users
+     * @return UserVO
      */
-    Users queryUserInfo(String userId);
+    UserVO queryUserInfo(String userId);
 
     /**
      * 修改用户信息
-     * @param userId userId
-     * @param centerUserBO centerUserBO
+     * @param userUpdateQO userUpdateQO
+     * @return UserVO
      */
-    Users updateUserInfo(String userId, CenterUserBO centerUserBO);
+    UserVO updateUserInfo(UserUpdateQO userUpdateQO);
 
     /**
      * 用户头像更新
      * @param userId userId
      * @param faceUrl faceUrl
-     * @return Users
+     * @return UserVO
      */
-    Users updateUserFace(String userId, String faceUrl);
+    UserVO updateUserFace(String userId, String faceUrl);
 }

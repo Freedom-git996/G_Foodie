@@ -1,8 +1,10 @@
 package com.vectory.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.github.pagehelper.PageHelper;
-import com.vectory.bo.OrderItemsCommentBO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.vectory.qo.OrderItemCommentQO;
+import com.vectory.qo.QueryMyCommentQO;
 import com.vectory.enums.YesOrNo;
 import com.vectory.mapper.ItemsCommentsMapper;
 import com.vectory.mapper.OrderItemsMapper;
@@ -12,7 +14,7 @@ import com.vectory.pojo.OrderItems;
 import com.vectory.pojo.OrderStatus;
 import com.vectory.pojo.Orders;
 import com.vectory.service.IMyCommentsService;
-import com.vectory.utils.PagedGridResult;
+import com.vectory.vo.PagedGridResultVO;
 import com.vectory.vo.MyCommentVO;
 import org.n3r.idworker.Sid;
 import org.springframework.stereotype.Service;
@@ -49,24 +51,18 @@ public class MyCommentsServiceImpl extends BaseServiceImpl implements IMyComment
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void saveComments(String orderId, String userId, List<OrderItemsCommentBO> commentList) {
-// 1. 保存评价 items_comments
-        for (OrderItemsCommentBO oic : commentList) {
+    public void saveComments(String orderId, String userId, List<OrderItemCommentQO> commentList) {
+        for (OrderItemCommentQO oic : commentList) {
             oic.setCommentId(sid.nextShort());
         }
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("commentList", commentList);
         itemsCommentsMapper.saveComments(map);
-
-        // 2. 修改订单表改已评价 orders
         Orders order = new Orders();
-
         order.setId(orderId);
         order.setIsComment(YesOrNo.YES.type);
         ordersMapper.updateById(order);
-
-        // 3. 修改订单状态表的留言时间 order_status
         OrderStatus orderStatus = new OrderStatus();
         orderStatus.setOrderId(orderId);
         orderStatus.setCommentTime(new Date());
@@ -75,13 +71,11 @@ public class MyCommentsServiceImpl extends BaseServiceImpl implements IMyComment
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public PagedGridResult queryMyComments(String userId, Integer page, Integer pageSize) {
+    public PagedGridResultVO queryMyComments(QueryMyCommentQO queryMyCommentQO) {
         Map<String, Object> map = new HashMap<>();
-        map.put("userId", userId);
-
-        PageHelper.startPage(page, pageSize);
-        List<MyCommentVO> list = itemsCommentsMapper.queryMyComments(map);
-
-        return setterPagedGrid(list, page);
+        map.put("userId", queryMyCommentQO.getUserId());
+        IPage<MyCommentVO> myCommentVOIPage = itemsCommentsMapper.queryMyComments(
+                new Page<>(queryMyCommentQO.getPageIndex(), queryMyCommentQO.getPageSize()), map);
+        return setterPagedGrid(myCommentVOIPage.getRecords(), Integer.parseInt(String.valueOf(myCommentVOIPage.getCurrent())));
     }
 }

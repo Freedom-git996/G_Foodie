@@ -1,8 +1,7 @@
 package com.vectory.config.timer;
 
 import com.vectory.service.IOrderService;
-import com.vectory.utils.DateUtil;
-import org.springframework.scheduling.annotation.Scheduled;
+import com.vectory.util.DateUtil;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;

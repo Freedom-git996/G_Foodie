@@ -1,8 +1,5 @@
 package com.vectory.enums;
 
-/**
- * @Description: 支付方式 枚举
- */
 public enum PayMethod {
 
 	WEIXIN(1, "微信"),

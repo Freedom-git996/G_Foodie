@@ -1,17 +1,20 @@
 package com.vectory.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import com.vectory.qo.CatItemQO;
+import com.vectory.qo.ItemCommentQO;
+import com.vectory.qo.SearchItemQO;
 import com.vectory.enums.CommentLevel;
 import com.vectory.enums.YesOrNo;
 import com.vectory.mapper.*;
 import com.vectory.pojo.*;
+import com.vectory.response.error.BusinessException;
+import com.vectory.response.error.EmBusinessResult;
 import com.vectory.service.IItemService;
-import com.vectory.utils.DesensitizationUtil;
-import com.vectory.utils.PagedGridResult;
-import com.vectory.vo.CommentLevelCountsVO;
+import com.vectory.vo.PagedGridResultVO;
+import com.vectory.vo.CommentCountsVO;
 import com.vectory.vo.ItemCommentVO;
 import com.vectory.vo.SearchItemsVO;
 import com.vectory.vo.ShopcartVO;
@@ -23,7 +26,7 @@ import javax.annotation.Resource;
 import java.util.*;
 
 @Service
-public class ItemServiceImpl implements IItemService {
+public class ItemServiceImpl extends BaseServiceImpl implements IItemService {
 
     @Resource
     private ItemsMapper itemsMapper;
@@ -45,6 +48,7 @@ public class ItemServiceImpl implements IItemService {
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public List<ItemsImg> queryItemImgList(String itemId) {
+        // 查询指定商品的图片
         QueryWrapper<ItemsImg> itemsImgQueryWrapper = new QueryWrapper<>();
         itemsImgQueryWrapper.eq("item_id", itemId);
         return itemsImgMapper.selectList(itemsImgQueryWrapper);
@@ -53,6 +57,7 @@ public class ItemServiceImpl implements IItemService {
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public List<ItemsSpec> queryItemSpecList(String itemId) {
+        // 查询指定商品规格
         QueryWrapper<ItemsSpec> itemsSpecQueryWrapper = new QueryWrapper<>();
         itemsSpecQueryWrapper.eq("item_id", itemId);
         return itemsSpecMapper.selectList(itemsSpecQueryWrapper);
@@ -61,6 +66,7 @@ public class ItemServiceImpl implements IItemService {
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public ItemsParam queryItemParam(String itemId) {
+        // 查询指定产品参数
         QueryWrapper<ItemsParam> itemsParamQueryWrapper = new QueryWrapper<>();
         itemsParamQueryWrapper.eq("item_id", itemId);
         return itemsParamMapper.selectOne(itemsParamQueryWrapper);
@@ -68,18 +74,16 @@ public class ItemServiceImpl implements IItemService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public CommentLevelCountsVO queryCommentCounts(String itemId) {
+    public CommentCountsVO queryCommentCounts(String itemId) {
         Integer goodCounts = getCommentCounts(itemId, CommentLevel.GOOD.type);
         Integer normalCounts = getCommentCounts(itemId, CommentLevel.NORMAL.type);
         Integer badCounts = getCommentCounts(itemId, CommentLevel.BAD.type);
         Integer totalCounts = goodCounts + normalCounts + badCounts;
-
-        CommentLevelCountsVO countsVO = new CommentLevelCountsVO();
+        CommentCountsVO countsVO = new CommentCountsVO();
         countsVO.setTotalCounts(totalCounts);
         countsVO.setGoodCounts(goodCounts);
         countsVO.setNormalCounts(normalCounts);
         countsVO.setBadCounts(badCounts);
-
         return countsVO;
     }
 
@@ -98,53 +102,34 @@ public class ItemServiceImpl implements IItemService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public PagedGridResult queryPagedComments(String itemId, Integer level, Integer page, Integer pageSize) {
+    public PagedGridResultVO queryPagedComments(ItemCommentQO itemCommentQO) {
         Map<String, Object> map = new HashMap<>();
-        map.put("itemId", itemId);
-        map.put("level", level);
-        PageHelper.startPage(page, pageSize);
-
-        List<ItemCommentVO> list = itemsMapper.queryItemComments(map);
-        for (ItemCommentVO vo : list) {
-            vo.setNickname(DesensitizationUtil.commonDisplay(vo.getNickname()));
-        }
-
-        return setterPagedGrid(list, page);
-    }
-
-    private PagedGridResult setterPagedGrid(List<?> list, Integer page) {
-        PageInfo<?> pageList = new PageInfo<>(list);
-        PagedGridResult grid = new PagedGridResult();
-        grid.setPage(page);
-        grid.setRows(list);
-        grid.setTotal(pageList.getPages());
-        grid.setRecords(pageList.getTotal());
-        return grid;
+        map.put("itemId", itemCommentQO.getItemId());
+        map.put("level", itemCommentQO.getLevel());
+        IPage<ItemCommentVO> itemCommentVOIPage = itemsMapper.queryItemCommentsPlus(
+                new Page<>(itemCommentQO.getPageIndex(), itemCommentQO.getPageSize()), map);
+        return setterPagedGrid(itemCommentVOIPage.getRecords(), Integer.parseInt(String.valueOf(itemCommentVOIPage.getCurrent())));
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
-    public PagedGridResult searhItems(String keywords, String sort, Integer page, Integer pageSize) {
+    public PagedGridResultVO searhItems(SearchItemQO searchItemQO) {
         Map<String, Object> map = new HashMap<>();
-        map.put("keywords", keywords);
-        map.put("sort", sort);
-
-        PageHelper.startPage(page, pageSize);
-        List<SearchItemsVO> list = itemsMapper.searchItems(map);
-
-        return setterPagedGrid(list, page);
+        map.put("keywords", searchItemQO.getKeywords());
+        map.put("sort", searchItemQO.getSort());
+        IPage<SearchItemsVO> searchItemsVOIPage = itemsMapper.searchItemsPlus(
+                new Page<>(searchItemQO.getPageIndex(), searchItemQO.getPageSize()), map);
+        return setterPagedGrid(searchItemsVOIPage.getRecords(), Integer.parseInt(String.valueOf(searchItemsVOIPage.getCurrent())));
     }
 
     @Override
-    public PagedGridResult searhItems(Integer catId, String sort, Integer page, Integer pageSize) {
+    public PagedGridResultVO searhItems(CatItemQO catItemQO) {
         Map<String, Object> map = new HashMap<>();
-        map.put("catId", catId);
-        map.put("sort", sort);
-
-        PageHelper.startPage(page, pageSize);
-        List<SearchItemsVO> list = itemsMapper.searchItemsByThirdCat(map);
-
-        return setterPagedGrid(list, page);
+        map.put("catId", catItemQO.getCatId());
+        map.put("sort", catItemQO.getSort());
+        IPage<SearchItemsVO> searchItemsVOIPage = itemsMapper.searchItemsByThirdCatPlus(
+                new Page<>(catItemQO.getPageIndex(), catItemQO.getPageSize()), map);
+        return setterPagedGrid(searchItemsVOIPage.getRecords(), Integer.parseInt(String.valueOf(searchItemsVOIPage.getCurrent())));
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -176,7 +161,7 @@ public class ItemServiceImpl implements IItemService {
     public void decreaseItemSpecStock(String specId, int buyCounts) {
         int result = itemsMapper.decreaseItemSpecStock(specId, buyCounts);
         if (result != 1) {
-            throw new RuntimeException("订单创建失败，原因：库存不足!");
+            throw new BusinessException(EmBusinessResult.ORDER_CREATE_FAIL);
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.vectory.service;
 
-import com.vectory.bo.UserBO;
-import com.vectory.pojo.Users;
+import com.vectory.qo.UserPassportQO;
+import com.vectory.vo.UserVO;
 
 public interface IUserService {
 
@@ -14,16 +14,15 @@ public interface IUserService {
 
     /**
      * 创建用户
-     * @param userBo userBo
+     * @param userPassportQO userBo
      * @return Users
      */
-    Users createUser(UserBO userBo);
+    UserVO createUser(UserPassportQO userPassportQO);
 
     /**
      * 检索用户名和密码是否匹配，用于登录
-     * @param username 用户名
-     * @param password 密码
+     * @param userPassportQO userBo
      * @return Users
      */
-    Users queryUserForLogin(String username, String password);
+    UserVO queryUserForLogin(UserPassportQO userPassportQO);
 }

@@ -1,14 +1,14 @@
 package com.vectory.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.vectory.qo.CatItemQO;
+import com.vectory.qo.ItemCommentQO;
+import com.vectory.qo.SearchItemQO;
 import com.vectory.pojo.Items;
 import com.vectory.pojo.ItemsImg;
 import com.vectory.pojo.ItemsParam;
 import com.vectory.pojo.ItemsSpec;
-import com.vectory.utils.PagedGridResult;
-import com.vectory.vo.CommentLevelCountsVO;
-import com.vectory.vo.ItemCommentVO;
-import com.vectory.vo.SearchItemsVO;
+import com.vectory.vo.PagedGridResultVO;
+import com.vectory.vo.CommentCountsVO;
 import com.vectory.vo.ShopcartVO;
 
 import java.util.List;
@@ -48,38 +48,28 @@ public interface IItemService {
      * @param itemId itemId
      * @return CommentLevelCountsVO
      */
-    CommentLevelCountsVO queryCommentCounts(String itemId);
+    CommentCountsVO queryCommentCounts(String itemId);
 
     /**
      * 根据商品id查询商品的评价（分页）
-     * @param itemId itemId
-     * @param level level
+     * @param itemCommentQO itemCommentQO
      * @return PagedGridResult
      */
-    PagedGridResult queryPagedComments(String itemId, Integer level,
-                                       Integer page, Integer pageSize);
+    PagedGridResultVO queryPagedComments(ItemCommentQO itemCommentQO);
 
     /**
      * 搜索商品列表
-     * @param keywords keywords
-     * @param sort sort
-     * @param page page
-     * @param pageSize pageSize
+     * @param searchItemQO searchItemQO
      * @return PagedGridResult
      */
-    PagedGridResult searhItems(String keywords, String sort,
-                                   Integer page, Integer pageSize);
+    PagedGridResultVO searhItems(SearchItemQO searchItemQO);
 
     /**
      * 根据分类id搜索商品列表
-     * @param catId catId
-     * @param sort sort
-     * @param page page
-     * @param pageSize pageSize
+     * @param catItemQO catItemQO
      * @return PagedGridResult
      */
-    PagedGridResult searhItems(Integer catId, String sort,
-                                      Integer page, Integer pageSize);
+    PagedGridResultVO searhItems(CatItemQO catItemQO);
 
     /**
      * 根据规格ids查询最新的购物车中商品数据（用于刷新渲染购物车中的商品数据）

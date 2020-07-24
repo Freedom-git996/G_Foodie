@@ -1,104 +1,65 @@
 package com.vectory.controller.center;
 
-import com.vectory.bo.OrderItemsCommentBO;
 import com.vectory.controller.BaseController;
+import com.vectory.qo.OrderCommentQO;
+import com.vectory.qo.QueryMyCommentQO;
+import com.vectory.qo.SaveCommentQO;
 import com.vectory.enums.YesOrNo;
 import com.vectory.pojo.OrderItems;
 import com.vectory.pojo.Orders;
+import com.vectory.response.CommonReturnType;
+import com.vectory.response.error.EmBusinessResult;
 import com.vectory.service.IMyCommentsService;
-import com.vectory.utils.JSONResult;
-import com.vectory.utils.PagedGridResult;
+import com.vectory.util.validator.ValidatorUtil;
+import com.vectory.vo.PagedGridResultVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
 
-@Api(value = "用户中心评价模块", tags = {"用户中心评价模块相关接口"})
+@Api(value = "MY_COMMENTS")
 @RestController
-@RequestMapping("mycomments")
+@RequestMapping("myComments")
 public class MyCommentsController extends BaseController {
 
     @Resource
     private IMyCommentsService myCommentsService;
 
-    @ApiOperation(value = "查询订单列表", notes = "查询订单列表", httpMethod = "POST")
-    @PostMapping("/pending")
-    public JSONResult pending(
-            @ApiParam(name = "userId", value = "用户id", required = true)
-            @RequestParam String userId,
-            @ApiParam(name = "orderId", value = "订单id", required = true)
-            @RequestParam String orderId) {
-
-        // 判断用户和订单是否关联
-        JSONResult checkResult = checkUserOrder(userId, orderId);
-        if (checkResult.getStatus() != HttpStatus.OK.value()) {
-            return checkResult;
-        }
-        // 判断该笔订单是否已经评价过，评价过了就不再继续
-        Orders myOrder = (Orders)checkResult.getData();
-        if (myOrder.getIsComment().equals(YesOrNo.YES.type)) {
-            return JSONResult.errorMsg("该笔订单已经评价");
-        }
-
-        List<OrderItems> list = myCommentsService.queryPendingComment(orderId);
-
-        return JSONResult.ok(list);
+    @ApiOperation(value = "ORDER_LIST", httpMethod = "POST")
+    @PostMapping("pending")
+    public CommonReturnType pending(@RequestBody OrderCommentQO orderCommentQO) {
+        ValidatorUtil.validate(orderCommentQO);
+        CommonReturnType commonReturnType = checkUserOrder(orderCommentQO.getUserId(), orderCommentQO.getOrderId());
+        if (commonReturnType.getStatus() != HttpStatus.OK.value())
+            return commonReturnType;
+        Orders myOrder = (Orders)commonReturnType.getData();
+        if (myOrder.getIsComment().equals(YesOrNo.YES.type))
+            return CommonReturnType.fail(EmBusinessResult.ORDER_COMMENTED);
+        List<OrderItems> list = myCommentsService.queryPendingComment(orderCommentQO.getOrderId());
+        return CommonReturnType.success(list);
     }
 
-    @ApiOperation(value = "保存评论列表", notes = "保存评论列表", httpMethod = "POST")
-    @PostMapping("/saveList")
-    public JSONResult saveList(
-            @ApiParam(name = "userId", value = "用户id", required = true)
-            @RequestParam String userId,
-            @ApiParam(name = "orderId", value = "订单id", required = true)
-            @RequestParam String orderId,
-            @RequestBody List<OrderItemsCommentBO> commentList) {
-
-        System.out.println(commentList);
-
-        // 判断用户和订单是否关联
-        JSONResult checkResult = checkUserOrder(userId, orderId);
-        if (checkResult.getStatus() != HttpStatus.OK.value()) {
-            return checkResult;
-        }
-        // 判断评论内容list不能为空
-        if (commentList == null || commentList.isEmpty()) {
-            return JSONResult.errorMsg("评论内容不能为空！");
-        }
-
-        myCommentsService.saveComments(orderId, userId, commentList);
-        return JSONResult.ok();
+    @ApiOperation(value = "SAVE_COMMENTS", httpMethod = "POST")
+    @PostMapping("saveList")
+    public CommonReturnType saveList(@RequestBody SaveCommentQO saveCommentQO) {
+        ValidatorUtil.validate(saveCommentQO);
+        CommonReturnType commonReturnType = checkUserOrder(saveCommentQO.getUserId(), saveCommentQO.getOrderId());
+        if (commonReturnType.getStatus() != HttpStatus.OK.value())
+            return commonReturnType;
+        if (saveCommentQO.getCommentList() == null || saveCommentQO.getCommentList().isEmpty())
+            return CommonReturnType.fail(EmBusinessResult.COMMENT_EMPTY);
+        myCommentsService.saveComments(saveCommentQO.getOrderId(), saveCommentQO.getUserId(), saveCommentQO.getCommentList());
+        return CommonReturnType.success();
     }
 
-    @ApiOperation(value = "查询我的评价", notes = "查询我的评价", httpMethod = "POST")
-    @PostMapping("/query")
-    public JSONResult query(
-            @ApiParam(name = "userId", value = "用户id", required = true)
-            @RequestParam String userId,
-            @ApiParam(name = "page", value = "查询下一页的第几页", required = false)
-            @RequestParam Integer page,
-            @ApiParam(name = "pageSize", value = "分页的每一页显示的条数", required = false)
-            @RequestParam Integer pageSize) {
-
-        if (StringUtils.isBlank(userId)) {
-            return JSONResult.errorMsg(null);
-        }
-        if (page == null) {
-            page = 1;
-        }
-        if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
-        }
-
-        PagedGridResult grid = myCommentsService.queryMyComments(userId,
-                page,
-                pageSize);
-
-        return JSONResult.ok(grid);
+    @ApiOperation(value = "查询我的评价", notes = "查询我的评价", httpMethod = "GET")
+    @GetMapping("query")
+    public CommonReturnType query(QueryMyCommentQO queryMyCommentQO) {
+        ValidatorUtil.validate(queryMyCommentQO);
+        PagedGridResultVO pagedGridResultVO = myCommentsService.queryMyComments(queryMyCommentQO);
+        return CommonReturnType.success(pagedGridResultVO);
     }
 }

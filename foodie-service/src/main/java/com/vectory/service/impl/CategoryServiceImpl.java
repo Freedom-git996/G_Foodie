@@ -40,7 +40,6 @@ public class CategoryServiceImpl implements ICategoryService {
     public List<NewItemsVO> getSixNewItemsLazy(Integer rootCatId) {
         Map<String, Object> map = new HashMap<>();
         map.put("rootCatId", rootCatId);
-
         return categoryMapper.getSixNewItemsLazy(map);
     }
 }

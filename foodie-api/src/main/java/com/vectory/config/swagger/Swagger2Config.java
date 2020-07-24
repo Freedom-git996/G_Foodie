@@ -29,7 +29,7 @@ public class Swagger2Config {
         return new ApiInfoBuilder()
                 .title("JavaApi")
                 .version("1.0")
-                .description("专注于Java架构师养成")
+                .description("专注于Java养成")
                 .contact(new Contact("vectory", "http://localhost:8088", "xxxx@168.com"))
                 .build();
     }
