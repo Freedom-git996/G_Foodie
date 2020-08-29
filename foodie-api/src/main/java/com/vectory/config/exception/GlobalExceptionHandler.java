@@ -3,6 +3,7 @@ package com.vectory.config.exception;
 import com.vectory.response.CommonReturnType;
 import com.vectory.response.error.BusinessException;
 import com.vectory.response.error.EmBusinessResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -14,11 +15,13 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 @ControllerAdvice
 @ResponseBody
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.OK)
     @ExceptionHandler(BusinessException.class)
     public CommonReturnType handlerBusinessException(BusinessException ex) {
+        log.error("BusinessException ===> status: {}, msg: {}", ex.getStatus(), ex.getMsg());
         return CommonReturnType.fail(ex.getStatus(), ex.getMsg());
     }
 

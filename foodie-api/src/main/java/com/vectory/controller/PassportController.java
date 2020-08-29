@@ -1,6 +1,7 @@
 package com.vectory.controller;
 
 import com.vectory.qo.UserPassportQO;
+import com.vectory.util.validator.ValidatorGroup;
 import com.vectory.util.validator.ValidatorUtil;
 import com.vectory.vo.UserVO;
 import com.vectory.response.CommonReturnType;
@@ -41,7 +42,7 @@ public class PassportController {
     public CommonReturnType regist(@RequestBody UserPassportQO userPassportQO,
                                    HttpServletRequest request,
                                    HttpServletResponse response) {
-        ValidatorUtil.validate(userPassportQO);
+        ValidatorUtil.validate(userPassportQO, ValidatorGroup.RegisterBean.class);
         if (!StringUtils.equals(userPassportQO.getPassword(), userPassportQO.getConfirmPassword()))
             return CommonReturnType.fail(EmBusinessResult.REPEAT_PASSWORD_ERROR);
         if (userService.queryUsernameIsExist(userPassportQO.getUsername()))
@@ -57,7 +58,7 @@ public class PassportController {
     public CommonReturnType login(@RequestBody UserPassportQO userPassportQO,
                                   HttpServletRequest request,
                                   HttpServletResponse response) {
-        ValidatorUtil.validate(userPassportQO);
+        ValidatorUtil.validate(userPassportQO, ValidatorGroup.LoginBean.class);
         UserVO userVO = userService.queryUserForLogin(userPassportQO);
         CookieUtil.setCookie(request, response, "user", JsonUtil.obj2String(userVO), true);
         // TODO 二期 弃用cookie，生成用户token，存入redis会话 同步购物车数据

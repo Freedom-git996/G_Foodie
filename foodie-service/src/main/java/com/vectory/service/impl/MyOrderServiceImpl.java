@@ -61,7 +61,7 @@ public class MyOrderServiceImpl extends BaseServiceImpl implements IMyOrderServi
     public Orders queryMyOrder(String userId, String orderId) {
         QueryWrapper<Orders> ordersQueryWrapper = new QueryWrapper<>();
         ordersQueryWrapper.eq("user_id", userId);
-        ordersQueryWrapper.eq("order_id", orderId);
+        ordersQueryWrapper.eq("id", orderId);
         ordersQueryWrapper.eq("is_delete", YesOrNo.NO.type);
 
         return ordersMapper.selectOne(ordersQueryWrapper);

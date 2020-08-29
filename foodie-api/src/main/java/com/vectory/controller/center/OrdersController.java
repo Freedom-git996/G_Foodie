@@ -57,8 +57,8 @@ public class OrdersController extends BaseController {
         // 填写慕课平台提供的支付凭证
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("imoocUserId","imooc");
-        headers.add("password","imooc");
+        headers.add("imoocUserId","5687683-3128877205");
+        headers.add("password","30if-90de-wjio-jjio");
 
         HttpEntity<MerchantOrdersVO> entity =
                 new HttpEntity<>(merchantOrdersVO, headers);
